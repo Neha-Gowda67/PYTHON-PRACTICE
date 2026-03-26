@@ -1,0 +1,60 @@
+import math
+
+class CacheSimulator:
+    def __init__(self, cache_size, block_size, associativity):
+        self.cache_size = cache_size              
+        self.block_size = block_size              
+        self.associativity = associativity        
+        self.num_sets = (cache_size // block_size) // associativity
+        
+        self.cache = [[] for _ in range(self.num_sets)]
+        self.hits = 0
+        self.misses = 0
+
+    def get_set_index(self, address):
+        block_address = address // self.block_size
+        return block_address % self.num_sets
+
+    def access_cache(self, address):
+        set_index = self.get_set_index(address)
+        cache_set = self.cache[set_index]
+
+        if address in cache_set:
+            self.hits += 1
+            
+            cache_set.remove(address)
+            cache_set.append(address)
+        else:
+            self.misses += 1
+        
+            if len(cache_set) >= self.associativity:
+                cache_set.pop(0)  
+            cache_set.append(address)
+
+    def display_results(self):
+        total = self.hits + self.misses
+        hit_ratio = (self.hits / total) * 100
+        miss_ratio = (self.misses / total) * 100
+        print(f"\nCache Simulation Results:")
+        print(f"Associativity: {self.associativity}-way")
+        print(f"Cache Size: {self.cache_size} bytes")
+        print(f"Block Size: {self.block_size} bytes")
+        print(f"Total Accesses: {total}")
+        print(f"Hits: {self.hits}")
+        print(f"Misses: {self.misses}")
+        print(f"Hit Ratio: {hit_ratio:.2f}%")
+        print(f"Miss Ratio: {miss_ratio:.2f}%")
+
+if __name__ == "__main__":
+    cache_size = 1024
+    block_size = 16         
+    associativity = 4   
+
+    simulator = CacheSimulator(cache_size, block_size, associativity)
+
+    memory_accesses = [4, 8, 16, 20, 8, 4, 32, 36, 8, 40, 44, 48, 4, 52, 56, 60]
+
+    for address in memory_accesses:
+        simulator.access_cache(address)
+
+    simulator.display_results()
